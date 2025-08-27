@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.chatbot.data.message.Message
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+
 
 class HomeViewModel : ViewModel() {
 

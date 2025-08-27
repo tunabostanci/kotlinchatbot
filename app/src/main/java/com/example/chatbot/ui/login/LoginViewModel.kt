@@ -3,11 +3,12 @@ package com.example.chatbot.ui.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import android.util.Patterns
 import com.example.chatbot.data.LoginRepository
 import com.example.chatbot.data.Result
-
 import com.example.chatbot.R
+import kotlinx.coroutines.launch
 
 class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() {
 
@@ -18,13 +19,16 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     val loginResult: LiveData<LoginResult> = _loginResult
 
     fun login(username: String, password: String) {
-        val result = loginRepository.login(username, password)
+        // Coroutine içinde suspend fonksiyonu çağırıyoruz
+        viewModelScope.launch {
+            val result = loginRepository.login(username, password)
 
-        if (result is Result.Success) {
-            _loginResult.value =
-                LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
-        } else {
-            _loginResult.value = LoginResult(error = R.string.login_failed)
+            if (result is Result.Success) {
+                _loginResult.value =
+                    LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
+            } else {
+                _loginResult.value = LoginResult(error = R.string.login_failed)
+            }
         }
     }
 
@@ -45,6 +49,7 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
             username.isNotBlank()
         }
     }
+
     private fun isPasswordValid(password: String): Boolean {
         return password.length > 5
     }

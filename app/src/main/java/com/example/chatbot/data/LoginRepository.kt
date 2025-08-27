@@ -12,7 +12,6 @@ class LoginRepository(val dataSource: LoginDataSource) {
         get() = user != null
 
     init {
-
         user = null
     }
 
@@ -21,7 +20,7 @@ class LoginRepository(val dataSource: LoginDataSource) {
         dataSource.logout()
     }
 
-    fun login(username: String, password: String): Result<LoggedInUser> {
+    suspend fun login(username: String, password: String): Result<LoggedInUser> {
 
         val result = dataSource.login(username, password)
 

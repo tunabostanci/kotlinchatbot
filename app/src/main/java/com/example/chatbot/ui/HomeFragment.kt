@@ -28,19 +28,18 @@ class HomeFragment : Fragment() {
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
 
-        // Şu an giriş yapan kullanıcı id'si (FirebaseAuth üzerinden alıyoruz)
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
         val messageAdapter = MessageAdapter(
-            messages = mutableListOf(), // Başlangıç boş liste
+            messages = mutableListOf(),
             currentUserId = currentUserId
         )
         recyclerView.adapter = messageAdapter
 
-        // Mesajları dinle
+
         viewModel.messages.observe(viewLifecycleOwner) { messages ->
             messageAdapter.submitList(messages)
-            recyclerView.scrollToPosition(messages.size - 1) // Son mesaja kaydır
+            recyclerView.scrollToPosition(messages.size - 1)
         }
     }
 
