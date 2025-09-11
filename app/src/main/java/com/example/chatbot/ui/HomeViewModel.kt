@@ -16,8 +16,7 @@ class HomeViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
     init {
-        db.collection("messages")
-            .orderBy("timestamp", Query.Direction.ASCENDING)
+        db.collection("messages").orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) return@addSnapshotListener
 
@@ -26,5 +25,14 @@ class HomeViewModel : ViewModel() {
                     _messages.value = list
                 }
             }
+    }
+
+    fun sendMessage(text: String, senderId: String) {
+        val message = Message(
+            text = text,
+            senderId = senderId,
+            timestamp = System.currentTimeMillis()
+        )
+        db.collection("messages").add(message)
     }
 }

@@ -1,10 +1,11 @@
+package com.example.chatbot.data.message
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chatbot.R
-import com.example.chatbot.data.message.Message
 
 class MessageAdapter(
     private val messages: MutableList<Message>,
