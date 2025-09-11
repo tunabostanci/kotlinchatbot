@@ -1,3 +1,18 @@
+import java.util.Properties
+
+val secretsProps = Properties()
+val secretsPropertiesFile = rootProject.file("scratch.properties")
+
+if (secretsPropertiesFile.exists()) {
+    secretsPropertiesFile.inputStream().use { secretsProps.load(it) }
+} else {
+    throw GradleException("scratch.properties dosyası bulunamadı. Lütfen API anahtarınızı içeren bir dosya oluşturun.")
+}
+
+val apiKey = secretsProps.getProperty("API_KEY")
+    ?: throw GradleException("API_KEY secrets.properties dosyasında bulunamadı.")
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -14,8 +29,11 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildFeatures{
+        buildConfig = true
     }
 
     buildTypes {
@@ -59,11 +77,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // 🔥 Firebase BOM: sürümleri burada yönet
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
 
-    // 🔥 Firebase kütüphaneleri (sürüm yazmana gerek yok)
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 }
