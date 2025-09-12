@@ -1,5 +1,6 @@
 package com.example.chatbot.ui
 
+import HomeViewModel
 import com.example.chatbot.data.message.MessageAdapter
 import androidx.fragment.app.viewModels
 import android.os.Bundle
@@ -31,6 +32,7 @@ class HomeFragment : Fragment() {
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.setHasFixedSize(true)
 
         val button = view.findViewById<ImageButton>(R.id.sendButton)
         val input = view.findViewById<EditText>(R.id.textView)
@@ -43,16 +45,17 @@ class HomeFragment : Fragment() {
         )
         recyclerView.adapter = messageAdapter
 
+        // Firestore'dan gelen mesajları gözle
         viewModel.messages.observe(viewLifecycleOwner) { messages ->
-            messageAdapter.submitList(messages)
+            messageAdapter.submitList(messages.toList())
             recyclerView.scrollToPosition(messages.size - 1)
         }
 
         button.setOnClickListener {
-            val message = input.text.toString().trim()
-            if (message.isNotEmpty()) {
-                viewModel.sendMessage(message, currentUserId)
-                Log.d("HomeFragment", "Message sent: $message")
+            val messageText = input.text.toString().trim()
+            if (messageText.isNotEmpty()) {
+                viewModel.sendMessage(messageText, currentUserId)
+                Log.d("chatbotLog", "Message sent: $messageText")
                 input.text.clear()
             }
         }

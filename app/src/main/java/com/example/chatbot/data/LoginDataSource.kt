@@ -13,11 +13,11 @@ class LoginDataSource {
 
     suspend fun login(username: String, password: String): Result<LoggedInUser> {
         return try {
-            // 1) Kullanıcıyı Firebase Auth ile giriş yaptır
+
             val authResult = auth.signInWithEmailAndPassword(username, password).await()
             val userId = authResult.user?.uid ?: throw Exception("User not found")
 
-            // 2) Firestore’dan kullanıcı bilgilerini çek
+
             val snapshot = firestore.collection("users").document(userId).get().await()
 
             val displayName = snapshot.getString("name") ?: "Unknown User"
