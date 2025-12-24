@@ -2,16 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_item_one"
-            android:icon="@android:drawable/ic_menu_compass"
-            android:title="Menu Item 1" />
+            android:id="@+id/nav_new_chat"
+            android:icon="@drawable/ic_add"
+            android:title="New Chat" />
         <item
-            android:id="@+id/nav_item_two"
-            android:icon="@android:drawable/ic_menu_info_details"
-            android:title="Menu Item 2" />
-        <item
-            android:id="@+id/nav_item_three"
-            android:icon="@android:drawable/ic_menu_preferences"
-            android:title="Menu Item 3" />
+            android:id="@+id/nav_start_quiz"
+            android:icon="@android:drawable/ic_menu_help"
+            android:title="Start Quiz" />
     </group>
+    <item
+        android:id="@+id/conversations_item"
+        android:title="Conversations">
+        <menu>
+            <!-- Conversations will be added here dynamically -->
+        </menu>
+    </item>
 </menu>

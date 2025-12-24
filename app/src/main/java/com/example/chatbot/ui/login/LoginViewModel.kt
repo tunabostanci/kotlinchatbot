@@ -3,12 +3,10 @@ package com.example.chatbot.ui.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import android.util.Patterns
 import com.example.chatbot.data.LoginRepository
 import com.example.chatbot.data.Result
 import com.example.chatbot.R
-import kotlinx.coroutines.launch
 
 class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() {
 
@@ -18,19 +16,24 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> = _loginResult
 
+    // --- DÜZELTİLMİŞ KISIM ---
     fun login(username: String, password: String) {
-        // Coroutine içinde suspend fonksiyonu çağırıyoruz
-        viewModelScope.launch {
-            val result = loginRepository.login(username, password)
-
+        // loginRepository.login metoduna, işlem bittiğinde ne yapılacağını söyleyen
+        // bir callback (lambda fonksiyonu) veriyoruz.
+        loginRepository.login(username, password) { result ->
+            // Bu kod bloğu, Firebase'den cevap geldiğinde çalışacak.
             if (result is Result.Success) {
-                _loginResult.value =
+                _loginResult.postValue( // Arka plandan UI'ı güvenle güncellemek için postValue kullanmak daha iyidir.
                     LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
+                )
             } else {
-                _loginResult.value = LoginResult(error = R.string.login_failed)
+                _loginResult.postValue(
+                    LoginResult(error = R.string.login_failed)
+                )
             }
         }
     }
+
 
     fun loginDataChanged(username: String, password: String) {
         if (!isUserNameValid(username)) {

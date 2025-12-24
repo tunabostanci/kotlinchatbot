@@ -2,7 +2,7 @@ package com.example.chatbot.data
 
 import com.example.chatbot.data.model.LoggedInUser
 
-class LoginRepository(val dataSource: LoginDataSource) {
+class LoginRepository(private val dataSource: LoginDataSource) {
 
     // in-memory cache of the loggedInUser object
     var user: LoggedInUser? = null
@@ -20,15 +20,8 @@ class LoginRepository(val dataSource: LoginDataSource) {
         dataSource.logout()
     }
 
-    suspend fun login(username: String, password: String): Result<LoggedInUser> {
-
-        val result = dataSource.login(username, password)
-
-        if (result is Result.Success) {
-            setLoggedInUser(result.data)
-        }
-
-        return result
+    fun login(email: String, password: String, callback: (Result<LoggedInUser>) -> Unit) {
+        dataSource.login(email, password, callback)
     }
 
     private fun setLoggedInUser(loggedInUser: LoggedInUser) {

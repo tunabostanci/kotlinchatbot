@@ -1,22 +1,22 @@
 package com.example.chatbot.ui
 
-import HomeViewModel
+import com.example.chatbot.ui.HomeViewModel
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.chatbot.QuizActivity
 import com.example.chatbot.R
 import com.example.chatbot.data.message.MessageAdapter
 import com.google.android.material.navigation.NavigationView
@@ -27,16 +27,13 @@ class HomeFragment : Fragment() {
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
-    private lateinit var drawerToggle: ActionBarDrawerToggle
     private lateinit var drawerButton: ImageButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_home, container, false)
-        setHasOptionsMenu(true)
-        return view
+        return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,15 +42,6 @@ class HomeFragment : Fragment() {
         drawerLayout = view.findViewById(R.id.drawer_layout)
         navigationView = view.findViewById(R.id.nav_view)
         drawerButton = view.findViewById(R.id.drawerButton)
-
-        drawerToggle = ActionBarDrawerToggle(
-            activity,
-            drawerLayout,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        )
-        drawerLayout.addDrawerListener(drawerToggle)
-        drawerToggle.syncState()
 
         drawerButton.setOnClickListener {
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -96,38 +84,33 @@ class HomeFragment : Fragment() {
 
     private fun setupNavigationMenu() {
         navigationView.setNavigationItemSelectedListener { menuItem ->
-            drawerLayout.closeDrawer(GravityCompat.START)
-            true
+            when (menuItem.itemId) {
+                R.id.nav_new_chat -> {
+                    viewModel.startNewConversation()
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_start_quiz -> {
+                    val intent = Intent(activity, QuizActivity::class.java)
+                    startActivity(intent)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                else -> false
+            }
         }
     }
 
     private fun updateNavigationMenu(conversations: List<com.example.chatbot.data.message.Conversation>) {
-        navigationView.menu.clear()
+        val conversationsMenu = navigationView.menu.findItem(R.id.conversations_item).subMenu
+        conversationsMenu?.clear()
 
-        // "Yeni Sohbet" butonu
-        navigationView.menu.add(Menu.NONE, R.id.nav_new_chat, Menu.NONE, "New Chat").setIcon(R.drawable.ic_add)
-            .setOnMenuItemClickListener {
-                viewModel.startNewConversation()
-                drawerLayout.closeDrawer(GravityCompat.START)
-                true
-            }
-
-
-        val conversationsMenu = navigationView.menu.addSubMenu("Conversations")
         conversations.forEach { conversation ->
-            conversationsMenu.add(conversation.name).setOnMenuItemClickListener {
+            conversationsMenu?.add(conversation.name)?.setOnMenuItemClickListener {
                 viewModel.selectConversation(conversation.id)
                 drawerLayout.closeDrawer(GravityCompat.START)
                 true
             }
         }
-    }
-
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (drawerToggle.onOptionsItemSelected(item)) {
-            return true
-        }
-        return super.onOptionsItemSelected(item)
     }
 }

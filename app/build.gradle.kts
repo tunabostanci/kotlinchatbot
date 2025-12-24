@@ -1,17 +1,11 @@
 import java.util.Properties
 
-val secretsProps = Properties()
-val secretsPropertiesFile = rootProject.file("scratch.properties")
-
-if (secretsPropertiesFile.exists()) {
-    secretsPropertiesFile.inputStream().use { secretsProps.load(it) }
-} else {
-    throw GradleException("scratch.properties dosyası bulunamadı. Lütfen API anahtarınızı içeren bir dosya oluşturun.")
+// local.properties dosyasını oku
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
 }
-
-val apiKey = secretsProps.getProperty("API_KEY")
-    ?: throw GradleException("API_KEY secrets.properties dosyasında bulunamadı.")
-
 
 plugins {
     alias(libs.plugins.android.application)
@@ -29,11 +23,13 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "API_KEY", "\"$apiKey\"")
+        // API anahtarını local.properties'den al
+        buildConfigField("String", "API_KEY", "\"${localProperties.getProperty("API_KEY") ?: ""}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures{
         buildConfig = true
+        viewBinding = true
     }
 
     buildTypes {
@@ -49,9 +45,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        jvmToolchain(11)
     }
+
     buildFeatures {
         viewBinding = true
     }
@@ -77,11 +74,11 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    implementation(platform(libs.firebase.bom))
 
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation(libs.google.firebase.auth)
+    implementation(libs.google.firebase.firestore)
+    implementation(libs.firebase.analytics)
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

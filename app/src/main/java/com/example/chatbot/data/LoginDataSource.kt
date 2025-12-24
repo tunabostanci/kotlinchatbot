@@ -6,31 +6,30 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import java.io.IOException
 
-class LoginDataSource {
+// LoginDataSource.kt
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+// Constructor'a FirebaseAuth parametresi ekleyin
+class LoginDataSource(private val firebaseAuth: FirebaseAuth) {
 
-    suspend fun login(username: String, password: String): Result<LoggedInUser> {
-        return try {
-
-            val authResult = auth.signInWithEmailAndPassword(username, password).await()
-            val userId = authResult.user?.uid ?: throw Exception("User not found")
-
-
-            val snapshot = firestore.collection("users").document(userId).get().await()
-
-            val displayName = snapshot.getString("name") ?: "Unknown User"
-
-            val loggedInUser = LoggedInUser(userId, displayName)
-
-            Result.Success(loggedInUser)
-        } catch (e: Exception) {
-            Result.Error(IOException("Error logging in", e))
-        }
+    fun login(email: String, password: String, callback: (Result<LoggedInUser>) -> Unit) {
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = firebaseAuth.currentUser
+                    if (user != null) {
+                        val loggedInUser = LoggedInUser(user.uid, user.displayName ?: user.email ?: "Unknown")
+                        callback(Result.Success(loggedInUser))
+                    } else {
+                        callback(Result.Error(IOException("Kullanıcı bulunamadı.")))
+                    }
+                } else {
+                    callback(Result.Error(IOException(task.exception?.message ?: "Giriş başarısız oldu.")))
+                }
+            }
     }
 
     fun logout() {
-        auth.signOut()
+        firebaseAuth.signOut()
     }
 }
+

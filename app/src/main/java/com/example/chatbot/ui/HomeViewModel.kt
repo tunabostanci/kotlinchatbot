@@ -1,3 +1,5 @@
+package com.example.chatbot.ui
+
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -33,7 +35,7 @@ class HomeViewModel : ViewModel() {
     private val _selectedConversationId = MutableLiveData<String>()
 
     init {
-        Log.d("chatbotLog", "API Key: $apiKey")
+        Log.d("chatbotLog", "API Key Is Present: ${apiKey.isNotEmpty()}")
         loadConversations()
 
         _selectedConversationId.observeForever { conversationId ->
@@ -131,6 +133,19 @@ class HomeViewModel : ViewModel() {
 
     @OptIn(BetaOpenAI::class)
     private fun generateBotReply(userText: String, conversationId: String) {
+        if (apiKey.isBlank()) {
+            val errorMessage = Message(
+                text = "API key not found. Please check your configuration.",
+                senderId = "bot",
+                timestamp = System.currentTimeMillis(),
+                conversationId = conversationId
+            )
+            val currentMessages = _messages.value ?: emptyList()
+            _messages.value = currentMessages + errorMessage
+            db.collection("messages").add(errorMessage)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val openAI = OpenAI(apiKey)
